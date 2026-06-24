@@ -1,0 +1,602 @@
+Exercise 1: Singleton Pattern
+
+Logger.java
+class Logger {
+    private static Logger instance;
+
+    private Logger() {
+        System.out.println("Logger Instance Created");
+    }
+
+    public static Logger getInstance() {
+        if (instance == null) {
+            instance = new Logger();
+        }
+        return instance;
+    }
+
+    public void log(String message) {
+        System.out.println("LOG: " + message);
+    }
+}
+
+SingletonTest.java
+public class SingletonTest {
+    public static void main(String[] args) {
+        Logger logger1 = Logger.getInstance();
+        Logger logger2 = Logger.getInstance();
+
+        logger1.log("First Message");
+        logger2.log("Second Message");
+
+        System.out.println(logger1 == logger2);
+    }
+}
+
+
+Exercise 2: Factory Method Pattern
+
+Document.java
+interface Document {
+    void open();
+}
+Concrete Documents
+class WordDocument implements Document {
+    public void open() {
+        System.out.println("Opening Word Document");
+    }
+}
+
+class PdfDocument implements Document {
+    public void open() {
+        System.out.println("Opening PDF Document");
+    }
+}
+
+class ExcelDocument implements Document {
+    public void open() {
+        System.out.println("Opening Excel Document");
+    }
+}
+
+Factory
+abstract class DocumentFactory {
+    abstract Document createDocument();
+}
+
+class WordFactory extends DocumentFactory {
+    public Document createDocument() {
+        return new WordDocument();
+    }
+}
+
+class PdfFactory extends DocumentFactory {
+    public Document createDocument() {
+        return new PdfDocument();
+    }
+}
+
+class ExcelFactory extends DocumentFactory {
+    public Document createDocument() {
+        return new ExcelDocument();
+    }
+}
+
+Test
+public class FactoryTest {
+    public static void main(String[] args) {
+        DocumentFactory factory = new PdfFactory();
+        Document doc = factory.createDocument();
+        doc.open();
+    }
+}
+
+
+Exercise 3: Builder Pattern
+
+Computer.java
+class Computer {
+    private String cpu;
+    private int ram;
+    private int storage;
+
+    private Computer(Builder builder) {
+        this.cpu = builder.cpu;
+        this.ram = builder.ram;
+        this.storage = builder.storage;
+    }
+
+    public void display() {
+        System.out.println("CPU: " + cpu);
+        System.out.println("RAM: " + ram + " GB");
+        System.out.println("Storage: " + storage + " GB");
+    }
+
+    static class Builder {
+        private String cpu;
+        private int ram;
+        private int storage;
+
+        public Builder setCPU(String cpu) {
+            this.cpu = cpu;
+            return this;
+        }
+
+        public Builder setRAM(int ram) {
+            this.ram = ram;
+            return this;
+        }
+
+        public Builder setStorage(int storage) {
+            this.storage = storage;
+            return this;
+        }
+
+        public Computer build() {
+            return new Computer(this);
+        }
+    }
+}
+
+Test
+public class BuilderTest {
+    public static void main(String[] args) {
+        Computer computer = new Computer.Builder()
+                .setCPU("Intel i7")
+                .setRAM(16)
+                .setStorage(512)
+                .build();
+
+        computer.display();
+    }
+}
+
+
+Exercise 4: Adapter Pattern
+
+Target Interface
+interface PaymentProcessor {
+    void processPayment(double amount);
+}
+Adaptee
+class PayPalGateway {
+    void makePayment(double amount) {
+        System.out.println("PayPal Payment: " + amount);
+    }
+}
+Adapter
+class PayPalAdapter implements PaymentProcessor {
+    private PayPalGateway gateway;
+
+    public PayPalAdapter(PayPalGateway gateway) {
+        this.gateway = gateway;
+    }
+
+    public void processPayment(double amount) {
+        gateway.makePayment(amount);
+    }
+}
+
+Test
+public class AdapterTest {
+    public static void main(String[] args) {
+        PaymentProcessor processor =
+                new PayPalAdapter(new PayPalGateway());
+
+        processor.processPayment(5000);
+    }
+}
+
+Exercise 5: Decorator Pattern
+
+Component
+interface Notifier {
+    void send(String message);
+}
+Concrete Component
+class EmailNotifier implements Notifier {
+    public void send(String message) {
+        System.out.println("Email: " + message);
+    }
+}
+
+Decorator
+abstract class NotifierDecorator implements Notifier {
+    protected Notifier notifier;
+
+    public NotifierDecorator(Notifier notifier) {
+        this.notifier = notifier;
+    }
+
+    public void send(String message) {
+        notifier.send(message);
+    }
+}
+
+Concrete Decorators
+class SMSNotifierDecorator extends NotifierDecorator {
+
+    public SMSNotifierDecorator(Notifier notifier) {
+        super(notifier);
+    }
+
+    public void send(String message) {
+        super.send(message);
+        System.out.println("SMS: " + message);
+    }
+}
+
+class SlackNotifierDecorator extends NotifierDecorator {
+
+    public SlackNotifierDecorator(Notifier notifier) {
+        super(notifier);
+    }
+
+    public void send(String message) {
+        super.send(message);
+        System.out.println("Slack: " + message);
+    }
+}
+
+Test
+public class DecoratorTest {
+    public static void main(String[] args) {
+        Notifier notifier =
+                new SlackNotifierDecorator(
+                        new SMSNotifierDecorator(
+                                new EmailNotifier()));
+
+        notifier.send("Meeting at 9 AM");
+    }
+}
+
+
+Exercise 6: Proxy Pattern
+
+Subject
+interface Image {
+    void display();
+}
+Real Subject
+class RealImage implements Image {
+    private String fileName;
+
+    public RealImage(String fileName) {
+        this.fileName = fileName;
+        loadImage();
+    }
+
+    private void loadImage() {
+        System.out.println("Loading image from server: " + fileName);
+    }
+
+    public void display() {
+        System.out.println("Displaying: " + fileName);
+    }
+}
+
+Proxy
+class ProxyImage implements Image {
+    private RealImage realImage;
+    private String fileName;
+
+    public ProxyImage(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public void display() {
+        if (realImage == null) {
+            realImage = new RealImage(fileName);
+        }
+        realImage.display();
+    }
+}
+
+Test
+public class ProxyTest {
+    public static void main(String[] args) {
+        Image image = new ProxyImage("photo.jpg");
+
+        image.display();
+        image.display();
+    }
+}
+
+
+Exercise 7: Observer Pattern
+
+Observer
+interface Observer {
+    void update(double price);
+}
+
+Subject
+interface Stock {
+    void registerObserver(Observer observer);
+    void removeObserver(Observer observer);
+    void notifyObservers();
+}
+
+Concrete Subject
+import java.util.*;
+
+class StockMarket implements Stock {
+    private List<Observer> observers = new ArrayList<>();
+    private double stockPrice;
+
+    public void setStockPrice(double price) {
+        stockPrice = price;
+        notifyObservers();
+    }
+
+    public void registerObserver(Observer observer) {
+        observers.add(observer);
+    }
+
+    public void removeObserver(Observer observer) {
+        observers.remove(observer);
+    }
+
+    public void notifyObservers() {
+        for (Observer observer : observers) {
+            observer.update(stockPrice);
+        }
+    }
+}
+
+Observers
+class MobileApp implements Observer {
+    public void update(double price) {
+        System.out.println("Mobile App: " + price);
+    }
+}
+
+class WebApp implements Observer {
+    public void update(double price) {
+        System.out.println("Web App: " + price);
+    }
+}
+
+Test
+public class ObserverTest {
+    public static void main(String[] args) {
+        StockMarket market = new StockMarket();
+
+        market.registerObserver(new MobileApp());
+        market.registerObserver(new WebApp());
+
+        market.setStockPrice(1500);
+    }
+}
+
+
+Exercise 8: Strategy Pattern
+
+Strategy
+interface PaymentStrategy {
+    void pay(int amount);
+}
+
+Concrete Strategies
+class CreditCardPayment implements PaymentStrategy {
+    public void pay(int amount) {
+        System.out.println("Paid " + amount + " using Credit Card");
+    }
+}
+
+class PayPalPayment implements PaymentStrategy {
+    public void pay(int amount) {
+        System.out.println("Paid " + amount + " using PayPal");
+    }
+}
+
+Context
+class PaymentContext {
+    private PaymentStrategy strategy;
+
+    public PaymentContext(PaymentStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public void executePayment(int amount) {
+        strategy.pay(amount);
+    }
+}
+
+Test
+public class StrategyTest {
+    public static void main(String[] args) {
+        PaymentContext context =
+                new PaymentContext(new CreditCardPayment());
+
+        context.executePayment(5000);
+
+        context = new PaymentContext(new PayPalPayment());
+        context.executePayment(3000);
+    }
+}
+
+Exercise 9: Command Pattern
+
+Command
+interface Command {
+    void execute();
+}
+
+Receiver
+class Light {
+    public void on() {
+        System.out.println("Light ON");
+    }
+
+    public void off() {
+        System.out.println("Light OFF");
+    }
+}
+
+Commands
+class LightOnCommand implements Command {
+    private Light light;
+
+    public LightOnCommand(Light light) {
+        this.light = light;
+    }
+
+    public void execute() {
+        light.on();
+    }
+}
+
+class LightOffCommand implements Command {
+    private Light light;
+
+    public LightOffCommand(Light light) {
+        this.light = light;
+    }
+
+    public void execute() {
+        light.off();
+    }
+}
+
+Invoker
+class RemoteControl {
+    private Command command;
+
+    public void setCommand(Command command) {
+        this.command = command;
+    }
+
+    public void pressButton() {
+        command.execute();
+    }
+}
+
+Test
+public class CommandTest {
+    public static void main(String[] args) {
+        Light light = new Light();
+        RemoteControl remote = new RemoteControl();
+
+        remote.setCommand(new LightOnCommand(light));
+        remote.pressButton();
+
+        remote.setCommand(new LightOffCommand(light));
+        remote.pressButton();
+    }
+}
+
+Exercise 10: MVC Pattern
+
+Model
+class Student {
+    private String name;
+    private int id;
+    private String grade;
+
+    public Student(String name, int id, String grade) {
+        this.name = name;
+        this.id = id;
+        this.grade = grade;
+    }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public int getId() { return id; }
+
+    public String getGrade() { return grade; }
+    public void setGrade(String grade) { this.grade = grade; }
+}
+
+View
+class StudentView {
+    public void displayStudentDetails(String name, int id, String grade) {
+        System.out.println("Name: " + name);
+        System.out.println("ID: " + id);
+        System.out.println("Grade: " + grade);
+    }
+}
+
+Controller
+class StudentController {
+    private Student model;
+    private StudentView view;
+
+    public StudentController(Student model, StudentView view) {
+        this.model = model;
+        this.view = view;
+    }
+
+    public void updateView() {
+        view.displayStudentDetails(
+                model.getName(),
+                model.getId(),
+                model.getGrade());
+    }
+
+    public void setStudentName(String name) {
+        model.setName(name);
+    }
+}
+
+Test
+public class MVCTest {
+    public static void main(String[] args) {
+        Student student =
+                new Student("Santanu", 101, "A");
+
+        StudentView view = new StudentView();
+
+        StudentController controller =
+                new StudentController(student, view);
+
+        controller.updateView();
+
+        controller.setStudentName("Rahul");
+
+        controller.updateView();
+    }
+}
+
+Exercise 11: Dependency Injection
+
+Repository
+interface CustomerRepository {
+    String findCustomerById(int id);
+}
+
+Repository Implementation
+class CustomerRepositoryImpl
+        implements CustomerRepository {
+
+    public String findCustomerById(int id) {
+        return "Customer ID: " + id;
+    }
+}
+
+Service
+class CustomerService {
+    private CustomerRepository repository;
+
+    public CustomerService(CustomerRepository repository) {
+        this.repository = repository;
+    }
+
+    public void getCustomer(int id) {
+        System.out.println(repository.findCustomerById(id));
+    }
+}
+
+Test
+public class DependencyInjectionTest {
+    public static void main(String[] args) {
+        CustomerRepository repository =
+                new CustomerRepositoryImpl();
+
+        CustomerService service =
+                new CustomerService(repository);
+
+        service.getCustomer(101);
+    }
+}
